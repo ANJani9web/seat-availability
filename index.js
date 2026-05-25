@@ -1,5 +1,6 @@
 const express = require("express");
 const { trainEnquiryByTrainNumber } = require("./services/trainEnquiryByTrainNumber");
+const { fetchTrainCompositionByTrainNumber } = require("./services/trainCompositionByTrainNumber");
 
 const app = express();
 
@@ -47,7 +48,9 @@ app.get("/data", async (req, res) => {
 
         // log train enquiry result to console
         console.log("Train Enquiry Result:", trainEnquiryResult);
-        // make a array of pairs of station code and station name from trainEnquiryResult
+        // make a array of pairs of station code and station name from trainEnquiryResult into an array of objects with code and name as keys
+        
+
         const stationCodeNamePairs = trainEnquiryResult.stationList.map(station => {
             return {
                 code: station.stationCode,
@@ -58,9 +61,30 @@ app.get("/data", async (req, res) => {
         // log station code name pairs to console
         console.log("Station Code Name Pairs:", stationCodeNamePairs);
 
+        const boardingStationCode = stationCodeNamePairs[0].code;
+
+        const trainCompositionData = await fetchTrainCompositionByTrainNumber(trainNumber, jDate, boardingStationCode);
+
+        // log train composition data to console
+        console.log("Train Composition Data:", trainCompositionData);
+
+        // store coachName and classCode from train composition data into an array of objects with coachName and classCode as keys
+        const coachClassPairs = trainCompositionData.cdd.map(coach => {
+            return {
+                coachName: coach.coachName,
+                classCode: coach.classCode
+            }
+        });
+
+        // log coach class pairs to console
+        console.log("Coach Class Pairs:", coachClassPairs);
+
         res.json({
             trainEnquiryResult,
-            stationCodeNamePairs
+            stationCodeNamePairs,
+            boardingStationCode,
+            trainCompositionData,
+            coachClassPairs
         });
 
 
