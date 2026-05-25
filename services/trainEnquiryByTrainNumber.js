@@ -1,4 +1,5 @@
 async function trainEnquiryByTrainNumber(trainNumber) {
+    console.log(`Fetching train enquiry data for train number ${trainNumber}...`);
     const trainEnquireyResponse = await fetch(`https://www.irctc.co.in/eticketing/protected/mapps1/trnscheduleenquiry/${trainNumber}`, {
         headers: {
             "accept": "application/json, text/plain, */*",
@@ -6,6 +7,12 @@ async function trainEnquiryByTrainNumber(trainNumber) {
             "greq": Date.now().toString(),
         }
     });
+
+    console.log(`Received response for train enquiry of train number ${trainNumber} with status ${trainEnquireyResponse.status}`);
+
+    if (!trainEnquireyResponse.ok) {
+        throw new Error(`Failed to fetch train enquiry data for train number ${trainNumber}: ${trainEnquireyResponse.statusText}`);
+    }
 
     const trainEnquireyData = await trainEnquireyResponse.json();
 
