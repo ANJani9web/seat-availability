@@ -1,0 +1,14 @@
+{
+  "name": "irctc-seat-availability",
+  "version": "1.0.0",
+  "description": "This is going to made for getting the seat/berth vacant number for the given train number",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Anjani Kumar",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1"
+  }
+}
