@@ -5,6 +5,9 @@ async function trainEnquiryByTrainNumber(trainNumber) {
             "accept": "application/json, text/plain, */*",
             "accept-language": "en-US,en;q=0.9",
             "greq": Date.now().toString(),
+            "User-Agent":
+                "PostmanRuntime/7.37.3",
+            "referer": "https://www.irctc.co.in/online-charts/",
         }
     });
 
