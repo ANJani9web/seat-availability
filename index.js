@@ -1,6 +1,7 @@
 const express = require("express");
 const { trainEnquiryByTrainNumber } = require("./services/trainEnquiryByTrainNumber");
 const { fetchTrainCompositionByTrainNumber } = require("./services/trainCompositionByTrainNumber");
+const { coachCompositionByTrainNumber } = require("./services/coachComposition");
 
 const app = express();
 
@@ -15,6 +16,8 @@ app.get("/data", async (req, res) => {
         // train number, jDate from query parameters
         const trainNumber = req.query.trainNumber;
         const jDate = req.query.jDate;
+        const toStationCode = req.query.toStationCode;
+        const fromStationCode = req.query.fromStationCode;
 
         console.log(`Received request for train ${trainNumber} on date ${jDate}`);
 
@@ -79,12 +82,75 @@ app.get("/data", async (req, res) => {
         // log coach class pairs to console
         console.log("Coach Class Pairs:", coachClassPairs);
 
+        // for coachClass let us call coach composition file 
+        const coachCompositionData = await coachCompositionByTrainNumber(trainNumber, boardingStationCode, jDate, coachClassPairs[0].coachName, coachClassPairs[0].classCode);
+        
+        // bdd is an outer array where each element is an object and each object has bsd as a key and bsd is an array of objects
+        const bdd = coachCompositionData.bdd;
+
+        // log coach composition data to console
+        console.log("Coach Composition Data:", coachCompositionData);
+        // the following is one of the object of bdd array, I want to store berthCode, berthNo and bsd array into an array of objects with berthCode, berthNo and bsd as keys
+        // {
+    //     "cabinCoupe": null,
+    //         "cabinCoupeNameNo": "1",
+    //             "berthCode": "L",
+    //                 "berthNo": 1,
+    //                     "from": "NDLS",
+    //                         "to": "RGD",
+    //                             "bsd": [
+    //                                 {
+    //                                     "splitNo": 1,
+    //                                     "from": "NDLS",
+    //                                     "to": "LKO",
+    //                                     "quota": "SS",
+    //                                     "occupancy": true
+    //                                 },
+    //                                 {
+    //                                     "splitNo": 2,
+    //                                     "from": "LKO",
+    //                                     "to": "BSB",
+    //                                     "quota": "GN",
+    //                                     "occupancy": false
+    //                                 },
+    //                                 {
+    //                                     "splitNo": 3,
+    //                                     "from": "BSB",
+    //                                     "to": "PNBE",
+    //                                     "quota": "SS",
+    //                                     "occupancy": true
+    //                                 },
+    //                                 {
+    //                                     "splitNo": 4,
+    //                                     "from": "PNBE",
+    //                                     "to": "RGD",
+    //                                     "quota": "GN",
+    //                                     "occupancy": false
+    //                                 }
+    //                             ],
+    //                                 "quotaCntStn": null,
+    //                                     "enable": true
+    // },
+        const bsdDataFrombdd = bdd.map(coach => {
+            return {
+                berthCode: coach.berthCode,
+                berthNo: coach.berthNo,
+                bsd: coach.bsd
+            };
+        });
+
+        // log bsd data from bdd to console
+        console.log("BSD Data from BDD:", bsdDataFrombdd);
+
         res.json({
             trainEnquiryResult,
             stationCodeNamePairs,
             boardingStationCode,
             trainCompositionData,
-            coachClassPairs
+            coachClassPairs,
+            coachCompositionData,
+            bdd,
+            bsdDataFrombdd
         });
 
 
