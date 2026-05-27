@@ -514,25 +514,305 @@ app.get("/data", async (req, res) => {
 
 // });
 
+// app.get('/seat', (req, res) => {
+
+//     const trainNumber =
+//         req.query.trainNumber;
+
+//     const jDate =
+//         req.query.jDate;
+
+//     const fromStationCode =
+//         req.query.fromStationCode;
+
+//     const toStationCode =
+//         req.query.toStationCode;
+
+//     const url =
+//         `/data?trainNumber=${trainNumber}` +
+//         `&jDate=${jDate}` +
+//         `&fromStationCode=${fromStationCode}` +
+//         `&toStationCode=${toStationCode}`;
+
+//     res.send(`
+
+//     <html>
+
+//         <head>
+
+//             <title>Seat Availability</title>
+
+//             <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+//             <style>
+
+//                 body {
+//                     font-family: Arial, sans-serif;
+//                     padding: 20px;
+//                 }
+
+//                 table {
+//                     border-collapse: collapse;
+//                     width: 100%;
+//                     margin-top: 20px;
+//                 }
+
+//                 th, td {
+//                     border: 1px solid black;
+//                     padding: 10px;
+//                     text-align: center;
+//                 }
+
+//                 th {
+//                     background-color: #f2f2f2;
+//                 }
+
+//                 button {
+//                     padding: 10px 20px;
+//                     margin-bottom: 20px;
+//                     cursor: pointer;
+//                 }
+
+//             </style>
+
+//         </head>
+
+//         <body>
+
+//             <button onclick="downloadPDF()">
+//                 Download PDF
+//             </button>
+
+//             <div id="pdf-content">
+
+//                 <div id="data"></div>
+
+//             </div>
+
+//             <script>
+
+//                 const parsedUrl = new URL(
+//                     '${url}',
+//                     window.location.origin
+//                 );
+
+//                 const trainNumber =
+//                     parsedUrl.searchParams.get(
+//                         "trainNumber"
+//                     );
+
+//                 const jDate =
+//                     parsedUrl.searchParams.get(
+//                         "jDate"
+//                     );
+
+//                 const fromStationCode =
+//                     parsedUrl.searchParams.get(
+//                         "fromStationCode"
+//                     );
+
+//                 const toStationCode =
+//                     parsedUrl.searchParams.get(
+//                         "toStationCode"
+//                     );
+
+//                 function downloadPDF() {
+
+//                     const filename =
+
+//                         trainNumber + '_' +
+
+//                         jDate + '_' +
+
+//                         fromStationCode + '_' +
+
+//                         toStationCode + '.pdf';
+
+//                     const element =
+//                         document.getElementById(
+//                             "pdf-content"
+//                         );
+
+//                     html2pdf()
+//                         .set({
+
+//                             margin: 10,
+
+//                             filename: filename,
+
+//                             html2canvas: {
+//                                 scale: 2
+//                             },
+
+//                             jsPDF: {
+//                                 unit: 'mm',
+//                                 format: 'a4',
+//                                 orientation: 'portrait'
+//                             }
+
+//                         })
+//                         .from(element)
+//                         .save();
+//                 }
+
+//                 fetch('${url}')
+
+//                     .then(response => response.json())
+
+//                     .then(data => {
+
+//                         const occupancyData =
+//                             data.occupancyData;
+
+//                         const stationCodeNamePairs =
+//                             data.stationCodeNamePairs;
+
+//                         const fromStation =
+//                             stationCodeNamePairs.find(
+//                                 station =>
+//                                     station.code ===
+//                                     fromStationCode
+//                             );
+
+//                         const toStation =
+//                             stationCodeNamePairs.find(
+//                                 station =>
+//                                     station.code ===
+//                                     toStationCode
+//                             );
+
+//                         const heading =
+//                             document.createElement("h2");
+
+//                         heading.textContent =
+
+//                             'Seat Availability for Train ' +
+
+//                             trainNumber +
+
+//                             ' on ' +
+
+//                             jDate +
+
+//                             ' from ' +
+
+//                             fromStationCode +
+
+//                             ' (' +
+
+//                             fromStation.name +
+
+//                             ')' +
+
+//                             ' to ' +
+
+//                             toStationCode +
+
+//                             ' (' +
+
+//                             toStation.name +
+
+//                             ')';
+
+//                         document.getElementById(
+//                             "pdf-content"
+//                         ).insertBefore(
+//                             heading,
+//                             document.getElementById("data")
+//                         );
+
+//                         const rows =
+//                             occupancyData.map(item => (
+
+//                                 '<tr>' +
+
+//                                     '<td>' +
+//                                         item.coachName +
+//                                     '</td>' +
+
+//                                     '<td>' +
+//                                         item.berthNo +
+//                                     '</td>' +
+
+//                                     '<td>' +
+//                                         item.berthCode +
+//                                     '</td>' +
+
+//                                     '<td>' +
+//                                         item.from +
+//                                     '</td>' +
+
+//                                     '<td>' +
+//                                         item.to +
+//                                     '</td>' +
+
+//                                     '<td>' +
+//                                         item.quota +
+//                                     '</td>' +
+
+//                                 '</tr>'
+
+//                             )).join("");
+
+//                         document.getElementById(
+//                             "data"
+//                         ).innerHTML =
+
+//                             '<table>' +
+
+//                                 '<thead>' +
+
+//                                     '<tr>' +
+
+//                                         '<th>Coach</th>' +
+
+//                                         '<th>Berth No</th>' +
+
+//                                         '<th>Berth Type</th>' +
+
+//                                         '<th>From</th>' +
+
+//                                         '<th>To</th>' +
+
+//                                         '<th>Quota</th>' +
+
+//                                     '</tr>' +
+
+//                                 '</thead>' +
+
+//                                 '<tbody>' +
+
+//                                     rows +
+
+//                                 '</tbody>' +
+
+//                             '</table>';
+
+//                     })
+
+//                     .catch(error => {
+
+//                         console.error(error);
+
+//                         document.getElementById(
+//                             "data"
+//                         ).innerHTML =
+
+//                             '<h3>Error loading data</h3>';
+
+//                     });
+
+//             </script>
+
+//         </body>
+
+//     </html>
+
+//     `);
+
+// });
+
 app.get('/seat', (req, res) => {
-
-    const trainNumber =
-        req.query.trainNumber;
-
-    const jDate =
-        req.query.jDate;
-
-    const fromStationCode =
-        req.query.fromStationCode;
-
-    const toStationCode =
-        req.query.toStationCode;
-
-    const url =
-        `/data?trainNumber=${trainNumber}` +
-        `&jDate=${jDate}` +
-        `&fromStationCode=${fromStationCode}` +
-        `&toStationCode=${toStationCode}`;
 
     res.send(`
 
@@ -540,7 +820,7 @@ app.get('/seat', (req, res) => {
 
         <head>
 
-            <title>Seat Availability</title>
+            <title>IRCTC Seat Availability</title>
 
             <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -549,6 +829,26 @@ app.get('/seat', (req, res) => {
                 body {
                     font-family: Arial, sans-serif;
                     padding: 20px;
+                }
+
+                h1 {
+                    margin-bottom: 20px;
+                }
+
+                .form-container {
+                    margin-bottom: 20px;
+                }
+
+                input {
+                    padding: 8px;
+                    margin-right: 10px;
+                    margin-bottom: 10px;
+                }
+
+                button {
+                    padding: 10px 20px;
+                    cursor: pointer;
+                    margin-right: 10px;
                 }
 
                 table {
@@ -567,23 +867,49 @@ app.get('/seat', (req, res) => {
                     background-color: #f2f2f2;
                 }
 
-                button {
-                    padding: 10px 20px;
-                    margin-bottom: 20px;
-                    cursor: pointer;
-                }
-
             </style>
 
         </head>
 
         <body>
 
-            <button onclick="downloadPDF()">
-                Download PDF
-            </button>
+            <h1>IRCTC Seat Availability</h1>
+
+            <div class="form-container">
+
+                <input
+                    id="trainNumber"
+                    placeholder="Train Number"
+                >
+
+                <input
+                    id="jDate"
+                    type="date"
+                >
+
+                <input
+                    id="fromStationCode"
+                    placeholder="From Station Code"
+                >
+
+                <input
+                    id="toStationCode"
+                    placeholder="To Station Code"
+                >
+
+                <button onclick="loadData()">
+                    Search
+                </button>
+
+                <button onclick="downloadPDF()">
+                    Download PDF
+                </button>
+
+            </div>
 
             <div id="pdf-content">
+
+                <div id="heading"></div>
 
                 <div id="data"></div>
 
@@ -591,75 +917,78 @@ app.get('/seat', (req, res) => {
 
             <script>
 
-                const parsedUrl = new URL(
-                    '${url}',
-                    window.location.origin
-                );
+                async function loadData() {
 
-                const trainNumber =
-                    parsedUrl.searchParams.get(
-                        "trainNumber"
-                    );
-
-                const jDate =
-                    parsedUrl.searchParams.get(
-                        "jDate"
-                    );
-
-                const fromStationCode =
-                    parsedUrl.searchParams.get(
-                        "fromStationCode"
-                    );
-
-                const toStationCode =
-                    parsedUrl.searchParams.get(
-                        "toStationCode"
-                    );
-
-                function downloadPDF() {
-
-                    const filename =
-
-                        trainNumber + '_' +
-
-                        jDate + '_' +
-
-                        fromStationCode + '_' +
-
-                        toStationCode + '.pdf';
-
-                    const element =
+                    const trainNumber =
                         document.getElementById(
-                            "pdf-content"
+                            "trainNumber"
+                        ).value;
+
+                    const jDate =
+                        document.getElementById(
+                            "jDate"
+                        ).value;
+
+                    const fromStationCode =
+                        document.getElementById(
+                            "fromStationCode"
+                        ).value;
+
+                    const toStationCode =
+                        document.getElementById(
+                            "toStationCode"
+                        ).value;
+
+                    if (
+                        !trainNumber ||
+                        !jDate ||
+                        !fromStationCode ||
+                        !toStationCode
+                    ) {
+
+                        alert(
+                            "Please fill all fields"
                         );
 
-                    html2pdf()
-                        .set({
+                        return;
+                    }
 
-                            margin: 10,
+                    const url =
 
-                            filename: filename,
+                        '/data?' +
 
-                            html2canvas: {
-                                scale: 2
-                            },
+                        'trainNumber=' +
+                        trainNumber +
 
-                            jsPDF: {
-                                unit: 'mm',
-                                format: 'a4',
-                                orientation: 'portrait'
-                            }
+                        '&jDate=' +
+                        jDate +
 
-                        })
-                        .from(element)
-                        .save();
-                }
+                        '&fromStationCode=' +
+                        fromStationCode +
 
-                fetch('${url}')
+                        '&toStationCode=' +
+                        toStationCode;
 
-                    .then(response => response.json())
+                    try {
 
-                    .then(data => {
+                        const response =
+                            await fetch(url);
+
+                        const data =
+                            await response.json();
+
+                        if (data.error) {
+
+                            document.getElementById(
+                                "data"
+                            ).innerHTML =
+
+                                '<h3>' +
+                                data.error +
+                                '</h3>';
+
+                            return;
+                        }
 
                         const occupancyData =
                             data.occupancyData;
@@ -681,10 +1010,11 @@ app.get('/seat', (req, res) => {
                                     toStationCode
                             );
 
-                        const heading =
-                            document.createElement("h2");
+                        document.getElementById(
+                            "heading"
+                        ).innerHTML =
 
-                        heading.textContent =
+                            '<h2>' +
 
                             'Seat Availability for Train ' +
 
@@ -712,14 +1042,9 @@ app.get('/seat', (req, res) => {
 
                             toStation.name +
 
-                            ')';
+                            ')' +
 
-                        document.getElementById(
-                            "pdf-content"
-                        ).insertBefore(
-                            heading,
-                            document.getElementById("data")
-                        );
+                            '</h2>';
 
                         const rows =
                             occupancyData.map(item => (
@@ -788,9 +1113,7 @@ app.get('/seat', (req, res) => {
 
                             '</table>';
 
-                    })
-
-                    .catch(error => {
+                    } catch (error) {
 
                         console.error(error);
 
@@ -798,9 +1121,68 @@ app.get('/seat', (req, res) => {
                             "data"
                         ).innerHTML =
 
-                            '<h3>Error loading data</h3>';
+                            '<h3>Error fetching data</h3>';
+                    }
+                }
 
-                    });
+                function downloadPDF() {
+
+                    const trainNumber =
+                        document.getElementById(
+                            "trainNumber"
+                        ).value;
+
+                    const jDate =
+                        document.getElementById(
+                            "jDate"
+                        ).value;
+
+                    const fromStationCode =
+                        document.getElementById(
+                            "fromStationCode"
+                        ).value;
+
+                    const toStationCode =
+                        document.getElementById(
+                            "toStationCode"
+                        ).value;
+
+                    const filename =
+
+                        trainNumber + '_' +
+
+                        jDate + '_' +
+
+                        fromStationCode + '_' +
+
+                        toStationCode + '.pdf';
+
+                    const element =
+                        document.getElementById(
+                            "pdf-content"
+                        );
+
+                    html2pdf()
+                        .set({
+
+                            margin: 5,
+
+                            filename: filename,
+
+                            html2canvas: {
+                                scale: 2
+                            },
+
+                            jsPDF: {
+                                unit: 'mm',
+                                format: 'a4',
+                                orientation: 'portrait'
+                            }
+
+                        })
+                        .from(element)
+                        .save();
+                }
 
             </script>
 
@@ -811,7 +1193,6 @@ app.get('/seat', (req, res) => {
     `);
 
 });
-
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
