@@ -290,72 +290,23 @@ app.get("/data", async (req, res) => {
     }
 });
 
-// const url = 'http://localhost:3000/data?trainNumber=12792&jDate=2026-05-27&fromStationCode=DNR&toStationCode=PRYJ';
-
-// app.get('/seat', (req, res) => {
-
-//     res.send(`
-//      <html>
-//         <body>
-//             <div id="data"></div>
-//             <script>
-// fetch('${url}')
-//     .then(response => response.json())
-//     .then(data => {
-
-//         const occupancyData = data.occupancyData;
-//         // const stationCodeNamePairs = data.stationCodeNamePairs;
-//         const parsedUrl = new URL('${url}');
-//         const trainNumber = parsedUrl.searchParams.get("trainNumber");
-//         const jDate = parsedUrl.searchParams.get("jDate");
-//         const fromStationCode = parsedUrl.searchParams.get("fromStationCode");
-//         const toStationCode = parsedUrl.searchParams.get("toStationCode");
-//         // fromStationName and toStationName from stationCodeNamePairs array where code is same as fromStationCode and toStationCode respectively
-//         const stationCodeNamePairs = data.stationCodeNamePairs;
-//         const fromStation = stationCodeNamePairs.find(station => station.code === fromStationCode);
-//         const toStation = stationCodeNamePairs.find(station => station.code === toStationCode);
-//         const heading = document.createElement("h2");
-//         heading.textContent = 'Seat Availability for Train ' + trainNumber + ' on ' + jDate + ' from ' + fromStationCode + '(' + fromStation.name + ')' + ' to ' + toStationCode + '(' + toStation.name + ')';
-//         document.body.insertBefore(heading, document.getElementById("data"));
-//         const rows = occupancyData.map(item => (
-//             '<tr>' +
-//                 '<td>' + item.coachName + '</td>' +
-//                 '<td>' + item.berthNo + '</td>' +
-//                 '<td>' + item.berthCode + '</td>' +
-//                 '<td>' + item.from + '</td>' +
-//                 '<td>' + item.to + '</td>' +
-//                 '<td>' + item.quota + '</td>' +
-//             '</tr>'
-//         )).join("");
-
-//         document.getElementById("data").innerHTML =
-//             '<table border="1" cellpadding="10">' +
-//                 '<thead>' +
-//                     '<tr>' +
-//                         '<th>Coach</th>' +
-//                         '<th>Berth No</th>' +
-//                         '<th>Berth Type</th>' +
-//                         '<th>From</th>' +
-//                         '<th>To</th>' +
-//                         '<th>Quota</th>' +
-//                     '</tr>' +
-//                 '</thead>' +
-//                 '<tbody>' +
-//                     rows +
-//                 '</tbody>' +
-//             '</table>';
-//     });
-//             </script>
-//         </body>
-//      </html>
-// `);
-
-// });
-
-const url =
-    '/data?trainNumber=12792&jDate=2026-05-27&fromStationCode=DDU&toStationCode=BSB';
-
 app.get('/seat', (req, res) => {
+
+    const trainNumber = req.query.trainNumber;
+
+    const jDate = req.query.jDate;
+
+    const fromStationCode =
+        req.query.fromStationCode;
+
+    const toStationCode =
+        req.query.toStationCode;
+
+    const url =
+        `/data?trainNumber=${trainNumber}` +
+        `&jDate=${jDate}` +
+        `&fromStationCode=${fromStationCode}` +
+        `&toStationCode=${toStationCode}`;
 
     res.send(`
     <html>
@@ -423,7 +374,11 @@ app.get('/seat', (req, res) => {
                     .then(response => response.json())
                     .then(data => {
 
-                        const occupancyData = data.occupancyData;
+                        const occupancyData =
+                            data.occupancyData;
+
+                        const stationCodeNamePairs =
+                            data.stationCodeNamePairs;
 
                         const parsedUrl = new URL(
                             '${url}',
@@ -431,30 +386,37 @@ app.get('/seat', (req, res) => {
                         );
 
                         const trainNumber =
-                            parsedUrl.searchParams.get("trainNumber");
+                            parsedUrl.searchParams.get(
+                                "trainNumber"
+                            );
 
                         const jDate =
-                            parsedUrl.searchParams.get("jDate");
+                            parsedUrl.searchParams.get(
+                                "jDate"
+                            );
 
                         const fromStationCode =
-                            parsedUrl.searchParams.get("fromStationCode");
+                            parsedUrl.searchParams.get(
+                                "fromStationCode"
+                            );
 
                         const toStationCode =
-                            parsedUrl.searchParams.get("toStationCode");
-
-                        const stationCodeNamePairs =
-                            data.stationCodeNamePairs;
+                            parsedUrl.searchParams.get(
+                                "toStationCode"
+                            );
 
                         const fromStation =
                             stationCodeNamePairs.find(
                                 station =>
-                                    station.code === fromStationCode
+                                    station.code ===
+                                    fromStationCode
                             );
 
                         const toStation =
                             stationCodeNamePairs.find(
                                 station =>
-                                    station.code === toStationCode
+                                    station.code ===
+                                    toStationCode
                             );
 
                         const heading =
@@ -481,18 +443,42 @@ app.get('/seat', (req, res) => {
                             document.getElementById("data")
                         );
 
-                        const rows = occupancyData.map(item => (
-                            '<tr>' +
-                                '<td>' + item.coachName + '</td>' +
-                                '<td>' + item.berthNo + '</td>' +
-                                '<td>' + item.berthCode + '</td>' +
-                                '<td>' + item.from + '</td>' +
-                                '<td>' + item.to + '</td>' +
-                                '<td>' + item.quota + '</td>' +
-                            '</tr>'
-                        )).join("");
+                        const rows =
+                            occupancyData.map(item => (
 
-                        document.getElementById("data").innerHTML =
+                                '<tr>' +
+
+                                    '<td>' +
+                                        item.coachName +
+                                    '</td>' +
+
+                                    '<td>' +
+                                        item.berthNo +
+                                    '</td>' +
+
+                                    '<td>' +
+                                        item.berthCode +
+                                    '</td>' +
+
+                                    '<td>' +
+                                        item.from +
+                                    '</td>' +
+
+                                    '<td>' +
+                                        item.to +
+                                    '</td>' +
+
+                                    '<td>' +
+                                        item.quota +
+                                    '</td>' +
+
+                                '</tr>'
+
+                            )).join("");
+
+                        document.getElementById(
+                            "data"
+                        ).innerHTML =
 
                             '<table>' +
 
