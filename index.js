@@ -2,14 +2,16 @@ const express = require("express");
 const { trainEnquiryByTrainNumber } = require("./services/trainEnquiryByTrainNumber");
 const { fetchTrainCompositionByTrainNumber } = require("./services/trainCompositionByTrainNumber");
 const { coachCompositionByTrainNumber } = require("./services/coachComposition");
+const { getOccupancyData } = require("./services/occupancyHelper");
 
 const app = express();
 
+//app.use(express.static("public"));
 app.use(express.json());
 
-app.get("/", (req, res) => {
-    res.send("Server running");
-});
+// app.get("/", (req, res) => {
+//     res.send("Server running");
+// });
 
 app.get("/data", async (req, res) => {
     try {
@@ -52,7 +54,7 @@ app.get("/data", async (req, res) => {
         // log train enquiry result to console
         console.log("Train Enquiry Result:", trainEnquiryResult);
         // make a array of pairs of station code and station name from trainEnquiryResult into an array of objects with code and name as keys
-        
+
 
         const stationCodeNamePairs = trainEnquiryResult.stationList.map(station => {
             return {
@@ -82,75 +84,202 @@ app.get("/data", async (req, res) => {
         // log coach class pairs to console
         console.log("Coach Class Pairs:", coachClassPairs);
 
-        // for coachClass let us call coach composition file 
-        const coachCompositionData = await coachCompositionByTrainNumber(trainNumber, boardingStationCode, jDate, coachClassPairs[0].coachName, coachClassPairs[0].classCode);
-        
+        // for coachClass let us call coach composition file by looping over coachClassPairs array and passing coachName and classCode as parameters to get coach composition data for each coach and store it in an array of objects with coachName, classCode and coachCompositionData as keys
+        const coachCompositionDataArray = [];
+
+        // I also want to these data in html table format and send it as response to client but before that let us log the occupancy data for each coach and class to console
+        // "occupancyData": [
+        //     {
+        //         "berthCode": "U",
+        //             "berthNo": 27,
+        //                 "from": "PNBE",
+        //                     "to": "BSB",
+        //                         "quota": "GN",
+        //                             "occupancy": false,
+        //                                 "coachName": "B5",
+        //                                     "coachCode": "3A"
+        //     },
+        //     {
+        //         "berthCode": "L",
+        //             "berthNo": 41,
+        //                 "from": "PNBE",
+        //                     "to": "BSB",
+        //                         "quota": "GN",
+        //                             "occupancy": false,
+        //                                 "coachName": "B5",
+        //                                     "coachCode": "3A"
+        //     },
+        //     {
+        //         "berthCode": "L",
+        //             "berthNo": 44,
+        //                 "from": "PNBE",
+        //                     "to": "AYC",
+        //                         "quota": "GN",
+        //                             "occupancy": false,
+        //                                 "coachName": "B5",
+        //                                     "coachCode": "3A"
+        //     },
+        //     {
+        //         "berthCode": "L",
+        //             "berthNo": 49,
+        //                 "from": "PNBE",
+        //                     "to": "BSB",
+        //                         "quota": "GN",
+        //                             "occupancy": false,
+        //                                 "coachName": "B5",
+        //                                     "coachCode": "3A"
+        //     },
+        //     {
+        //         "berthCode": "L",
+        //             "berthNo": 52,
+        //                 "from": "PNBE",
+        //                     "to": "BSB",
+        //                         "quota": "GN",
+        //                             "occupancy": false,
+        //                                 "coachName": "B5",
+        //                                     "coachCode": "3A"
+        //     }
+        //   ]
+
+        const occupancyDataArray = [];
+        for (const coachClassPair of coachClassPairs) {
+            const coachCompositionData = await coachCompositionByTrainNumber(trainNumber, boardingStationCode, jDate, coachClassPair.coachName, coachClassPair.classCode);
+            const occupancyData = getOccupancyData(coachCompositionData, stationCodeNamePairs, fromStationCode, toStationCode, coachClassPair.coachName, coachClassPair.classCode);
+            console.log(`Occupancy Data for coach ${coachClassPair.coachName} and class ${coachClassPair.classCode}:`, occupancyData);
+            coachCompositionDataArray.push({
+                coachName: coachClassPair.coachName,
+                classCode: coachClassPair.classCode,
+                coachCompositionData: coachCompositionData,
+                occupancyData: occupancyData
+            });
+
+            occupancyDataArray.push(...occupancyData);
+
+            // I also want to this occupancyData in html table format 
+
+
+
+        }
+
+        console.log("Coach Composition Data Array:", coachCompositionDataArray);
+
+        // log coach composition data array to console
+        // console.log("Coach Composition Data Array:", coachCompositionDataArray);
+        // const coachCompositionData = await coachCompositionByTrainNumber(trainNumber, boardingStationCode, jDate, "B3", "3A");
+
         // bdd is an outer array where each element is an object and each object has bsd as a key and bsd is an array of objects
-        const bdd = coachCompositionData.bdd;
+        // const bdd = coachCompositionData.bdd;
 
-        // log coach composition data to console
-        console.log("Coach Composition Data:", coachCompositionData);
-        // the following is one of the object of bdd array, I want to store berthCode, berthNo and bsd array into an array of objects with berthCode, berthNo and bsd as keys
-        // {
-    //     "cabinCoupe": null,
-    //         "cabinCoupeNameNo": "1",
-    //             "berthCode": "L",
-    //                 "berthNo": 1,
-    //                     "from": "NDLS",
-    //                         "to": "RGD",
-    //                             "bsd": [
-    //                                 {
-    //                                     "splitNo": 1,
-    //                                     "from": "NDLS",
-    //                                     "to": "LKO",
-    //                                     "quota": "SS",
-    //                                     "occupancy": true
-    //                                 },
-    //                                 {
-    //                                     "splitNo": 2,
-    //                                     "from": "LKO",
-    //                                     "to": "BSB",
-    //                                     "quota": "GN",
-    //                                     "occupancy": false
-    //                                 },
-    //                                 {
-    //                                     "splitNo": 3,
-    //                                     "from": "BSB",
-    //                                     "to": "PNBE",
-    //                                     "quota": "SS",
-    //                                     "occupancy": true
-    //                                 },
-    //                                 {
-    //                                     "splitNo": 4,
-    //                                     "from": "PNBE",
-    //                                     "to": "RGD",
-    //                                     "quota": "GN",
-    //                                     "occupancy": false
-    //                                 }
-    //                             ],
-    //                                 "quotaCntStn": null,
-    //                                     "enable": true
-    // },
-        const bsdDataFrombdd = bdd.map(coach => {
-            return {
-                berthCode: coach.berthCode,
-                berthNo: coach.berthNo,
-                bsd: coach.bsd
-            };
-        });
+        // // log coach composition data to console
+        // console.log("Coach Composition Data:", coachCompositionData);
+        // // the following is one of the object of bdd array, I want to store berthCode, berthNo and bsd array into an array of objects with berthCode, berthNo and bsd as keys
+        // // {
+        // //     "cabinCoupe": null,
+        // //         "cabinCoupeNameNo": "1",
+        // //             "berthCode": "L",
+        // //                 "berthNo": 1,
+        // //                     "from": "NDLS",
+        // //                         "to": "RGD",
+        // //                             "bsd": [
+        // //                                 {
+        // //                                     "splitNo": 1,
+        // //                                     "from": "NDLS",
+        // //                                     "to": "LKO",
+        // //                                     "quota": "SS",
+        // //                                     "occupancy": true
+        // //                                 },
+        // //                                 {
+        // //                                     "splitNo": 2,
+        // //                                     "from": "LKO",
+        // //                                     "to": "BSB",
+        // //                                     "quota": "GN",
+        // //                                     "occupancy": false
+        // //                                 },
+        // //                                 {
+        // //                                     "splitNo": 3,
+        // //                                     "from": "BSB",
+        // //                                     "to": "PNBE",
+        // //                                     "quota": "SS",
+        // //                                     "occupancy": true
+        // //                                 },
+        // //                                 {
+        // //                                     "splitNo": 4,
+        // //                                     "from": "PNBE",
+        // //                                     "to": "RGD",
+        // //                                     "quota": "GN",
+        // //                                     "occupancy": false
+        // //                                 }
+        // //                             ],
+        // //                                 "quotaCntStn": null,
+        // //                                     "enable": true
+        // // },
+        // const bsdDataFrombdd = bdd.map(coach => {
+        //     return {
+        //         berthCode: coach.berthCode,
+        //         berthNo: coach.berthNo,
+        //         bsd: coach.bsd
+        //     };
+        // });
 
-        // log bsd data from bdd to console
-        console.log("BSD Data from BDD:", bsdDataFrombdd);
+        // // log bsd data from bdd to console
+        // console.log("BSD Data from BDD:", bsdDataFrombdd);
+
+        // // let us find index value for fromStationCode and toStationCode from stationCodeNamePairs array
+        // const fromStationIndex = stationCodeNamePairs.findIndex(station => station.code === fromStationCode);
+        // const toStationIndex = stationCodeNamePairs.findIndex(station => station.code === toStationCode);
+
+        // if (fromStationIndex === -1) {
+        //     throw new Error(`From station code ${fromStationCode} not found in station code name pairs`);
+        // }
+
+        // if (toStationIndex === -1) {
+        //     throw new Error(`To station code ${toStationCode} not found in station code name pairs`);
+        // }
+        // // log from station index and to station index to console
+        // console.log("From Station Index:", fromStationIndex);
+        // console.log("To Station Index:", toStationIndex);
+
+
+        // // loop over bsdDataFrombdd and for each bsd array, find the occupancy for fromStationIndex and toStationIndex and store it in an array of objects with berthCode, berthNo, fromOccupancy and toOccupancy as keys
+        // const occupancyData = bsdDataFrombdd.flatMap(coach => {
+        //     const bsdData = coach.bsd;
+        //     // loop over each object of bsdData and find the index for from and to station code and it lies between fromStationIndex and toStationIndex then we will consider occupancy for that bsd object
+        //     const results = [];
+        //     bsdData.forEach(bsd => {
+        //         const fromIndex = stationCodeNamePairs.findIndex(station => station.code === bsd.from);
+        //         const toIndex = stationCodeNamePairs.findIndex(station => station.code === bsd.to);
+        //         if (fromIndex <= fromStationIndex && toIndex >= toStationIndex) {
+        //             if (!bsd.occupancy) {
+        //                 // return berthNumber, berthCode, bsd.from, bsd.to, bsd.quota and occupancy as false AND also add coachName and coachClass from coachClassPairs array where coachName is same as coach.coachName and classCode is same as coach.classCode
+        //                 results.push({
+        //                     berthCode: coach.berthCode,
+        //                     berthNo: coach.berthNo,
+        //                     from: bsd.from,
+        //                     to: bsd.to,
+        //                     quota: bsd.quota,
+        //                     occupancy: false,
+        //                     coachName: "B3",
+        //                     coachClass: "3A"
+        //                 });
+        //             }
+        //         }
+        //     });
+        //     return results;
+        // });
+        // // log occupancy data to console
+        // console.log("Occupancy Data:", occupancyData);
 
         res.json({
-            trainEnquiryResult,
-            stationCodeNamePairs,
-            boardingStationCode,
-            trainCompositionData,
-            coachClassPairs,
-            coachCompositionData,
-            bdd,
-            bsdDataFrombdd
+            // trainEnquiryResult,
+            // stationCodeNamePairs,
+            // boardingStationCode,
+            // trainCompositionData,
+            // coachClassPairs,
+            // bdd,
+            // bsdDataFrombdd,
+            //coachCompositionDataArray
+            "occupancyData": occupancyDataArray,
+            stationCodeNamePairs
         });
 
 
@@ -159,6 +288,244 @@ app.get("/data", async (req, res) => {
             error: err.message
         });
     }
+});
+
+// const url = 'http://localhost:3000/data?trainNumber=12792&jDate=2026-05-27&fromStationCode=DNR&toStationCode=PRYJ';
+
+// app.get('/seat', (req, res) => {
+
+//     res.send(`
+//      <html>
+//         <body>
+//             <div id="data"></div>
+//             <script>
+// fetch('${url}')
+//     .then(response => response.json())
+//     .then(data => {
+
+//         const occupancyData = data.occupancyData;
+//         // const stationCodeNamePairs = data.stationCodeNamePairs;
+//         const parsedUrl = new URL('${url}');
+//         const trainNumber = parsedUrl.searchParams.get("trainNumber");
+//         const jDate = parsedUrl.searchParams.get("jDate");
+//         const fromStationCode = parsedUrl.searchParams.get("fromStationCode");
+//         const toStationCode = parsedUrl.searchParams.get("toStationCode");
+//         // fromStationName and toStationName from stationCodeNamePairs array where code is same as fromStationCode and toStationCode respectively
+//         const stationCodeNamePairs = data.stationCodeNamePairs;
+//         const fromStation = stationCodeNamePairs.find(station => station.code === fromStationCode);
+//         const toStation = stationCodeNamePairs.find(station => station.code === toStationCode);
+//         const heading = document.createElement("h2");
+//         heading.textContent = 'Seat Availability for Train ' + trainNumber + ' on ' + jDate + ' from ' + fromStationCode + '(' + fromStation.name + ')' + ' to ' + toStationCode + '(' + toStation.name + ')';
+//         document.body.insertBefore(heading, document.getElementById("data"));
+//         const rows = occupancyData.map(item => (
+//             '<tr>' +
+//                 '<td>' + item.coachName + '</td>' +
+//                 '<td>' + item.berthNo + '</td>' +
+//                 '<td>' + item.berthCode + '</td>' +
+//                 '<td>' + item.from + '</td>' +
+//                 '<td>' + item.to + '</td>' +
+//                 '<td>' + item.quota + '</td>' +
+//             '</tr>'
+//         )).join("");
+
+//         document.getElementById("data").innerHTML =
+//             '<table border="1" cellpadding="10">' +
+//                 '<thead>' +
+//                     '<tr>' +
+//                         '<th>Coach</th>' +
+//                         '<th>Berth No</th>' +
+//                         '<th>Berth Type</th>' +
+//                         '<th>From</th>' +
+//                         '<th>To</th>' +
+//                         '<th>Quota</th>' +
+//                     '</tr>' +
+//                 '</thead>' +
+//                 '<tbody>' +
+//                     rows +
+//                 '</tbody>' +
+//             '</table>';
+//     });
+//             </script>
+//         </body>
+//      </html>
+// `);
+
+// });
+
+const url =
+    '/data?trainNumber=12792&jDate=2026-05-27&fromStationCode=DDU&toStationCode=BSB';
+
+app.get('/seat', (req, res) => {
+
+    res.send(`
+    <html>
+
+        <head>
+
+            <title>Seat Availability</title>
+
+            <style>
+
+                body {
+                    font-family: Arial, sans-serif;
+                    padding: 20px;
+                }
+
+                table {
+                    border-collapse: collapse;
+                    width: 100%;
+                    margin-top: 20px;
+                }
+
+                th, td {
+                    border: 1px solid black;
+                    padding: 10px;
+                    text-align: center;
+                }
+
+                th {
+                    background-color: #f2f2f2;
+                }
+
+                button {
+                    padding: 10px 20px;
+                    margin-bottom: 20px;
+                    cursor: pointer;
+                }
+
+                @media print {
+
+                    button {
+                        display: none;
+                    }
+
+                }
+
+            </style>
+
+        </head>
+
+        <body>
+
+            <button onclick="downloadPDF()">
+                Download PDF
+            </button>
+
+            <div id="data"></div>
+
+            <script>
+
+                function downloadPDF() {
+                    window.print();
+                }
+
+                fetch('${url}')
+                    .then(response => response.json())
+                    .then(data => {
+
+                        const occupancyData = data.occupancyData;
+
+                        const parsedUrl = new URL(
+                            '${url}',
+                            window.location.origin
+                        );
+
+                        const trainNumber =
+                            parsedUrl.searchParams.get("trainNumber");
+
+                        const jDate =
+                            parsedUrl.searchParams.get("jDate");
+
+                        const fromStationCode =
+                            parsedUrl.searchParams.get("fromStationCode");
+
+                        const toStationCode =
+                            parsedUrl.searchParams.get("toStationCode");
+
+                        const stationCodeNamePairs =
+                            data.stationCodeNamePairs;
+
+                        const fromStation =
+                            stationCodeNamePairs.find(
+                                station =>
+                                    station.code === fromStationCode
+                            );
+
+                        const toStation =
+                            stationCodeNamePairs.find(
+                                station =>
+                                    station.code === toStationCode
+                            );
+
+                        const heading =
+                            document.createElement("h2");
+
+                        heading.textContent =
+                            'Seat Availability for Train ' +
+                            trainNumber +
+                            ' on ' +
+                            jDate +
+                            ' from ' +
+                            fromStationCode +
+                            ' (' +
+                            fromStation.name +
+                            ')' +
+                            ' to ' +
+                            toStationCode +
+                            ' (' +
+                            toStation.name +
+                            ')';
+
+                        document.body.insertBefore(
+                            heading,
+                            document.getElementById("data")
+                        );
+
+                        const rows = occupancyData.map(item => (
+                            '<tr>' +
+                                '<td>' + item.coachName + '</td>' +
+                                '<td>' + item.berthNo + '</td>' +
+                                '<td>' + item.berthCode + '</td>' +
+                                '<td>' + item.from + '</td>' +
+                                '<td>' + item.to + '</td>' +
+                                '<td>' + item.quota + '</td>' +
+                            '</tr>'
+                        )).join("");
+
+                        document.getElementById("data").innerHTML =
+
+                            '<table>' +
+
+                                '<thead>' +
+
+                                    '<tr>' +
+                                        '<th>Coach</th>' +
+                                        '<th>Berth No</th>' +
+                                        '<th>Berth Type</th>' +
+                                        '<th>From</th>' +
+                                        '<th>To</th>' +
+                                        '<th>Quota</th>' +
+                                    '</tr>' +
+
+                                '</thead>' +
+
+                                '<tbody>' +
+
+                                    rows +
+
+                                '</tbody>' +
+
+                            '</table>';
+
+                    });
+
+            </script>
+
+        </body>
+
+    </html>
+    `);
+
 });
 
 const PORT = process.env.PORT || 3000;

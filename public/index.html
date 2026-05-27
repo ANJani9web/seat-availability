@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<body>
+
+    <h1>Frontend</h1>
+
+    <button onclick="loadData()">
+        Get Data
+    </button>
+
+    <div id="result"></div>
+
+    <script>
+
+        async function loadData() {
+
+            const response = await fetch(
+                '/data?trainNumber=13237&jDate=2026-05-24&fromStationCode=PNBE&toStationCode=BSB'
+            );
+
+            const data = await response.json();
+
+            const occupancyData = data.occupancyData;
+
+            const rows = occupancyData.map(item => `
+            <tr>
+                <td>${item.coachName}</td>
+                <td>${item.berthNo}</td>
+                <td>${item.berthCode}</td>
+                <td>${item.from}</td>
+                <td>${item.to}</td>
+                <td>${item.quota}</td>
+            </tr>
+        `).join("");
+
+            document.getElementById("result").innerHTML = `
+            <table border="1" cellpadding="10">
+    
+                <thead>
+                    <tr>
+                        <th>Coach</th>
+                        <th>Berth No</th>
+                        <th>Berth Type</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Quota</th>
+                    </tr>
+                </thead>
+    
+                <tbody>
+                    ${rows}
+                </tbody>
+    
+            </table>
+        `;
+        }
+
+    </script>
+
+</body>
+
+</html>
