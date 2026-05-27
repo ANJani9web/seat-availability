@@ -290,11 +290,237 @@ app.get("/data", async (req, res) => {
     }
 });
 
+// app.get('/seat', (req, res) => {
+
+//     const trainNumber = req.query.trainNumber;
+
+//     const jDate = req.query.jDate;
+
+//     const fromStationCode =
+//         req.query.fromStationCode;
+
+//     const toStationCode =
+//         req.query.toStationCode;
+
+//     const url =
+//         `/data?trainNumber=${trainNumber}` +
+//         `&jDate=${jDate}` +
+//         `&fromStationCode=${fromStationCode}` +
+//         `&toStationCode=${toStationCode}`;
+
+//     res.send(`
+//     <html>
+
+//         <head>
+
+//             <title>Seat Availability</title>
+
+//             <style>
+
+//                 body {
+//                     font-family: Arial, sans-serif;
+//                     padding: 20px;
+//                 }
+
+//                 table {
+//                     border-collapse: collapse;
+//                     width: 100%;
+//                     margin-top: 20px;
+//                 }
+
+//                 th, td {
+//                     border: 1px solid black;
+//                     padding: 10px;
+//                     text-align: center;
+//                 }
+
+//                 th {
+//                     background-color: #f2f2f2;
+//                 }
+
+//                 button {
+//                     padding: 10px 20px;
+//                     margin-bottom: 20px;
+//                     cursor: pointer;
+//                 }
+
+//                 @media print {
+
+//                     button {
+//                         display: none;
+//                     }
+
+//                 }
+
+//             </style>
+
+//         </head>
+
+//         <body>
+
+//             <button onclick="downloadPDF()">
+//                 Download PDF
+//             </button>
+
+//             <div id="data"></div>
+
+//             <script>
+
+//                 function downloadPDF() {
+//                     window.print();
+//                 }
+
+//                 fetch('${url}')
+//                     .then(response => response.json())
+//                     .then(data => {
+
+//                         const occupancyData =
+//                             data.occupancyData;
+
+//                         const stationCodeNamePairs =
+//                             data.stationCodeNamePairs;
+
+//                         const parsedUrl = new URL(
+//                             '${url}',
+//                             window.location.origin
+//                         );
+
+//                         const trainNumber =
+//                             parsedUrl.searchParams.get(
+//                                 "trainNumber"
+//                             );
+
+//                         const jDate =
+//                             parsedUrl.searchParams.get(
+//                                 "jDate"
+//                             );
+
+//                         const fromStationCode =
+//                             parsedUrl.searchParams.get(
+//                                 "fromStationCode"
+//                             );
+
+//                         const toStationCode =
+//                             parsedUrl.searchParams.get(
+//                                 "toStationCode"
+//                             );
+
+//                         const fromStation =
+//                             stationCodeNamePairs.find(
+//                                 station =>
+//                                     station.code ===
+//                                     fromStationCode
+//                             );
+
+//                         const toStation =
+//                             stationCodeNamePairs.find(
+//                                 station =>
+//                                     station.code ===
+//                                     toStationCode
+//                             );
+
+//                         const heading =
+//                             document.createElement("h2");
+
+//                         heading.textContent =
+//                             'Seat Availability for Train ' +
+//                             trainNumber +
+//                             ' on ' +
+//                             jDate +
+//                             ' from ' +
+//                             fromStationCode +
+//                             ' (' +
+//                             fromStation.name +
+//                             ')' +
+//                             ' to ' +
+//                             toStationCode +
+//                             ' (' +
+//                             toStation.name +
+//                             ')';
+
+//                         document.body.insertBefore(
+//                             heading,
+//                             document.getElementById("data")
+//                         );
+
+//                         const rows =
+//                             occupancyData.map(item => (
+
+//                                 '<tr>' +
+
+//                                     '<td>' +
+//                                         item.coachName +
+//                                     '</td>' +
+
+//                                     '<td>' +
+//                                         item.berthNo +
+//                                     '</td>' +
+
+//                                     '<td>' +
+//                                         item.berthCode +
+//                                     '</td>' +
+
+//                                     '<td>' +
+//                                         item.from +
+//                                     '</td>' +
+
+//                                     '<td>' +
+//                                         item.to +
+//                                     '</td>' +
+
+//                                     '<td>' +
+//                                         item.quota +
+//                                     '</td>' +
+
+//                                 '</tr>'
+
+//                             )).join("");
+
+//                         document.getElementById(
+//                             "data"
+//                         ).innerHTML =
+
+//                             '<table>' +
+
+//                                 '<thead>' +
+
+//                                     '<tr>' +
+//                                         '<th>Coach</th>' +
+//                                         '<th>Berth No</th>' +
+//                                         '<th>Berth Type</th>' +
+//                                         '<th>From</th>' +
+//                                         '<th>To</th>' +
+//                                         '<th>Quota</th>' +
+//                                     '</tr>' +
+
+//                                 '</thead>' +
+
+//                                 '<tbody>' +
+
+//                                     rows +
+
+//                                 '</tbody>' +
+
+//                             '</table>';
+
+//                     });
+
+//             </script>
+
+//         </body>
+
+//     </html>
+//     `);
+
+// });
+
 app.get('/seat', (req, res) => {
 
-    const trainNumber = req.query.trainNumber;
+    const trainNumber =
+        req.query.trainNumber;
 
-    const jDate = req.query.jDate;
+    const jDate =
+        req.query.jDate;
 
     const fromStationCode =
         req.query.fromStationCode;
@@ -309,11 +535,14 @@ app.get('/seat', (req, res) => {
         `&toStationCode=${toStationCode}`;
 
     res.send(`
+
     <html>
 
         <head>
 
             <title>Seat Availability</title>
+
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
             <style>
 
@@ -344,14 +573,6 @@ app.get('/seat', (req, res) => {
                     cursor: pointer;
                 }
 
-                @media print {
-
-                    button {
-                        display: none;
-                    }
-
-                }
-
             </style>
 
         </head>
@@ -362,16 +583,82 @@ app.get('/seat', (req, res) => {
                 Download PDF
             </button>
 
-            <div id="data"></div>
+            <div id="pdf-content">
+
+                <div id="data"></div>
+
+            </div>
 
             <script>
 
+                const parsedUrl = new URL(
+                    '${url}',
+                    window.location.origin
+                );
+
+                const trainNumber =
+                    parsedUrl.searchParams.get(
+                        "trainNumber"
+                    );
+
+                const jDate =
+                    parsedUrl.searchParams.get(
+                        "jDate"
+                    );
+
+                const fromStationCode =
+                    parsedUrl.searchParams.get(
+                        "fromStationCode"
+                    );
+
+                const toStationCode =
+                    parsedUrl.searchParams.get(
+                        "toStationCode"
+                    );
+
                 function downloadPDF() {
-                    window.print();
+
+                    const filename =
+
+                        trainNumber + '_' +
+
+                        jDate + '_' +
+
+                        fromStationCode + '_' +
+
+                        toStationCode + '.pdf';
+
+                    const element =
+                        document.getElementById(
+                            "pdf-content"
+                        );
+
+                    html2pdf()
+                        .set({
+
+                            margin: 10,
+
+                            filename: filename,
+
+                            html2canvas: {
+                                scale: 2
+                            },
+
+                            jsPDF: {
+                                unit: 'mm',
+                                format: 'a4',
+                                orientation: 'portrait'
+                            }
+
+                        })
+                        .from(element)
+                        .save();
                 }
 
                 fetch('${url}')
+
                     .then(response => response.json())
+
                     .then(data => {
 
                         const occupancyData =
@@ -379,31 +666,6 @@ app.get('/seat', (req, res) => {
 
                         const stationCodeNamePairs =
                             data.stationCodeNamePairs;
-
-                        const parsedUrl = new URL(
-                            '${url}',
-                            window.location.origin
-                        );
-
-                        const trainNumber =
-                            parsedUrl.searchParams.get(
-                                "trainNumber"
-                            );
-
-                        const jDate =
-                            parsedUrl.searchParams.get(
-                                "jDate"
-                            );
-
-                        const fromStationCode =
-                            parsedUrl.searchParams.get(
-                                "fromStationCode"
-                            );
-
-                        const toStationCode =
-                            parsedUrl.searchParams.get(
-                                "toStationCode"
-                            );
 
                         const fromStation =
                             stationCodeNamePairs.find(
@@ -423,22 +685,38 @@ app.get('/seat', (req, res) => {
                             document.createElement("h2");
 
                         heading.textContent =
+
                             'Seat Availability for Train ' +
+
                             trainNumber +
+
                             ' on ' +
+
                             jDate +
+
                             ' from ' +
+
                             fromStationCode +
+
                             ' (' +
+
                             fromStation.name +
+
                             ')' +
+
                             ' to ' +
+
                             toStationCode +
+
                             ' (' +
+
                             toStation.name +
+
                             ')';
 
-                        document.body.insertBefore(
+                        document.getElementById(
+                            "pdf-content"
+                        ).insertBefore(
                             heading,
                             document.getElementById("data")
                         );
@@ -485,12 +763,19 @@ app.get('/seat', (req, res) => {
                                 '<thead>' +
 
                                     '<tr>' +
+
                                         '<th>Coach</th>' +
+
                                         '<th>Berth No</th>' +
+
                                         '<th>Berth Type</th>' +
+
                                         '<th>From</th>' +
+
                                         '<th>To</th>' +
+
                                         '<th>Quota</th>' +
+
                                     '</tr>' +
 
                                 '</thead>' +
@@ -503,6 +788,18 @@ app.get('/seat', (req, res) => {
 
                             '</table>';
 
+                    })
+
+                    .catch(error => {
+
+                        console.error(error);
+
+                        document.getElementById(
+                            "data"
+                        ).innerHTML =
+
+                            '<h3>Error loading data</h3>';
+
                     });
 
             </script>
@@ -510,6 +807,7 @@ app.get('/seat', (req, res) => {
         </body>
 
     </html>
+
     `);
 
 });
